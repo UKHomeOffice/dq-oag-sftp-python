@@ -17,6 +17,7 @@ pipeline:
   deploy_to_dev:
     image: quay.io/ukhomeofficedigital/kd
     environment:
+      - ENV=notprod
       - KUBE_NAMESPACE=dq-apps-notprod
       - INSECURE_SKIP_TLS_VERIFY=true
       - OAG_PVC_SIZE=1Gi
@@ -45,6 +46,7 @@ pipeline:
       - export OAG_RDS_PASSWORD=$$NOTPROD_OAG_RDS_PASSWORD
       - export OAG_RDS_TABLE=$$NOTPROD_OAG_RDS_TABLE
       - export SLACK_WEBHOOK=$$NOTPROD_SLACK_WEBHOOK
+      - kd --delete -f kube/deployment.yml
       - kd -f kube/pvc.yml -f kube/secret.yml -f kube/deployment.yml
     secrets:
       - NOTPROD_KUBE_TOKEN
@@ -69,6 +71,7 @@ pipeline:
   deploy_to_production:
     image: quay.io/ukhomeofficedigital/kd
     environment:
+      - ENV=prod
       - KUBE_NAMESPACE=dq-apps
       - INSECURE_SKIP_TLS_VERIFY=true
       - OAG_PVC_SIZE=5Gi
@@ -97,6 +100,7 @@ pipeline:
       - export OAG_RDS_PASSWORD=$$PROD_OAG_RDS_PASSWORD
       - export OAG_RDS_TABLE=$$PROD_OAG_RDS_TABLE
       - export SLACK_WEBHOOK=$$PROD_SLACK_WEBHOOK
+      - kd --delete -f kube/deployment.yml
       - kd -f kube/pvc.yml -f kube/secret.yml -f kube/deployment.yml
     secrets:
       - PROD_KUBE_TOKEN

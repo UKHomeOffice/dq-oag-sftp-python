@@ -1,4 +1,4 @@
-FROM quay.io/ukhomeofficedigital/centos-base:latest
+FROM centos:centos8
 
 ENV USERMAP_UID 1000
 ENV PYTHONPATH="$PYTHONPATH:/ADT"

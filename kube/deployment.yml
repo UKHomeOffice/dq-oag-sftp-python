@@ -158,7 +158,7 @@ spec:
           failureThreshold: 10
 
       - name: clamav
-        image: quay.io/ukhomeofficedigital/acp-clamav:0.2.11
+        image: quay.io/ukhomeofficedigital/clamav:latest
         imagePullPolicy: Always
         securityContext:
           runAsNonRoot: true

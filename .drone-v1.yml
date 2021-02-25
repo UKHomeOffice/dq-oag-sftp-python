@@ -1,0 +1,180 @@
+---
+kind: pipeline
+name: default
+type: kubernetes
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  pull: if-not-exists
+  image: plugins/docker
+  settings:
+    context: app
+    dockerfile: app/Dockerfile
+    force_tag: true
+    registry: quay.io
+    repo: quay.io/ukhomeofficedigital/dq-oag-sftp-docker
+    tags:
+    - ${DRONE_COMMIT_SHA}
+    - ${DRONE_BUILD_NUMBER}
+  environment:
+    DOCKER_PASSWORD:
+      from_secret: docker_password
+    DOCKER_USERNAME:
+      from_secret: docker_username
+  when:
+    event:
+    - push
+
+- name: deploy_to_dev
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/kd
+  commands:
+  - export KUBE_TOKEN=$$NOTPROD_KUBE_TOKEN
+  - export KUBE_SERVER=$$NOTPROD_KUBE_SERVER
+  - export SSH_REMOTE_HOST_MAYTECH=$$NOTPROD_SSH_REMOTE_HOST_MAYTECH
+  - export SSH_REMOTE_USER_MAYTECH=$$NOTPROD_SSH_REMOTE_USER_MAYTECH
+  - export SSH_PRIVATE_KEY=$$NOTPROD_SSH_PRIVATE_KEY_PATH
+  - export PRIVATE_KEY=$$NOTPROD_SSH_PRIVATE_KEY
+  - export SSH_LANDING_DIR=$$NOTPROD_SSH_LANDING_DIR
+  - export S3_BUCKET_NAME=$$NOTPROD_S3_BUCKET_NAME
+  - export S3_ACCESS_KEY_ID=$$NOTPROD_S3_ACCESS_KEY_ID
+  - export S3_SECRET_ACCESS_KEY=$$NOTPROD_S3_SECRET_ACCESS_KEY
+  - export OAG_RDS_HOST=$$NOTPROD_OAG_RDS_HOST
+  - export OAG_RDS_DATABASE=$$NOTPROD_OAG_RDS_DATABASE
+  - export OAG_RDS_USERNAME=$$NOTPROD_OAG_RDS_USERNAME
+  - export OAG_RDS_PASSWORD=$$NOTPROD_OAG_RDS_PASSWORD
+  - export OAG_RDS_TABLE=$$NOTPROD_OAG_RDS_TABLE
+  - export SLACK_WEBHOOK=$$NOTPROD_SLACK_WEBHOOK
+  - kd --delete -f kube/deployment.yml
+  - kd -f kube/pvc.yml -f kube/secret.yml -f kube/deployment.yml
+  environment:
+    CLAMAV_CPU_LIMIT: 2.5
+    CLAMAV_CPU_REQUEST: 2
+    CLAMAV_RAM_LIMIT: 4Gi
+    CLAMAV_RAM_REQUEST: 3Gi
+    ENV: notprod
+    INSECURE_SKIP_TLS_VERIFY: true
+    KUBE_NAMESPACE: dq-apps-notprod
+    NOTPROD_KUBE_SERVER:
+      from_secret: NOTPROD_KUBE_SERVER
+    NOTPROD_KUBE_TOKEN:
+      from_secret: NOTPROD_KUBE_TOKEN
+    NOTPROD_OAG_RDS_DATABASE:
+      from_secret: NOTPROD_OAG_RDS_DATABASE
+    NOTPROD_OAG_RDS_HOST:
+      from_secret: NOTPROD_OAG_RDS_HOST
+    NOTPROD_OAG_RDS_PASSWORD:
+      from_secret: NOTPROD_OAG_RDS_PASSWORD
+    NOTPROD_OAG_RDS_TABLE:
+      from_secret: NOTPROD_OAG_RDS_TABLE
+    NOTPROD_OAG_RDS_USERNAME:
+      from_secret: NOTPROD_OAG_RDS_USERNAME
+    NOTPROD_S3_ACCESS_KEY_ID:
+      from_secret: NOTPROD_S3_ACCESS_KEY_ID
+    NOTPROD_S3_BUCKET_NAME:
+      from_secret: NOTPROD_S3_BUCKET_NAME
+    NOTPROD_S3_SECRET_ACCESS_KEY:
+      from_secret: NOTPROD_S3_SECRET_ACCESS_KEY
+    NOTPROD_SLACK_WEBHOOK:
+      from_secret: NOTPROD_SLACK_WEBHOOK
+    NOTPROD_SSH_LANDING_DIR:
+      from_secret: NOTPROD_SSH_LANDING_DIR
+    NOTPROD_SSH_PRIVATE_KEY:
+      from_secret: NOTPROD_SSH_PRIVATE_KEY
+    NOTPROD_SSH_PRIVATE_KEY_PATH:
+      from_secret: NOTPROD_SSH_PRIVATE_KEY_PATH
+    NOTPROD_SSH_REMOTE_HOST_MAYTECH:
+      from_secret: NOTPROD_SSH_REMOTE_HOST_MAYTECH
+    NOTPROD_SSH_REMOTE_USER_MAYTECH:
+      from_secret: NOTPROD_SSH_REMOTE_USER_MAYTECH
+    OAG_CPU_LIMIT: 2.5
+    OAG_CPU_REQUEST: 2
+    OAG_PVC_SIZE: 5Gi
+    OAG_RAM_LIMIT: 4Gi
+    OAG_RAM_REQUEST: 3Gi
+  when:
+    event:
+    - push
+
+- name: deploy_to_production
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/kd
+  commands:
+  - export KUBE_TOKEN=$$PROD_KUBE_TOKEN
+  - export KUBE_SERVER=$$PROD_KUBE_SERVER
+  - export SSH_REMOTE_HOST_MAYTECH=$$PROD_SSH_REMOTE_HOST_MAYTECH
+  - export SSH_REMOTE_USER_MAYTECH=$$PROD_SSH_REMOTE_USER_MAYTECH
+  - export SSH_PRIVATE_KEY=$$PROD_SSH_PRIVATE_KEY_PATH
+  - export PRIVATE_KEY=$$PROD_SSH_PRIVATE_KEY
+  - export SSH_LANDING_DIR=$$PROD_SSH_LANDING_DIR
+  - export S3_BUCKET_NAME=$$PROD_S3_BUCKET_NAME
+  - export S3_ACCESS_KEY_ID=$$PROD_S3_ACCESS_KEY_ID
+  - export S3_SECRET_ACCESS_KEY=$$PROD_S3_SECRET_ACCESS_KEY
+  - export OAG_RDS_HOST=$$PROD_OAG_RDS_HOST
+  - export OAG_RDS_DATABASE=$$PROD_OAG_RDS_DATABASE
+  - export OAG_RDS_USERNAME=$$PROD_OAG_RDS_USERNAME
+  - export OAG_RDS_PASSWORD=$$PROD_OAG_RDS_PASSWORD
+  - export OAG_RDS_TABLE=$$PROD_OAG_RDS_TABLE
+  - export SLACK_WEBHOOK=$$PROD_SLACK_WEBHOOK
+  - kd --delete -f kube/deployment.yml
+  - kd -f kube/pvc.yml -f kube/secret.yml -f kube/deployment.yml
+  environment:
+    CLAMAV_CPU_LIMIT: 2.5
+    CLAMAV_CPU_REQUEST: 2
+    CLAMAV_RAM_LIMIT: 4Gi
+    CLAMAV_RAM_REQUEST: 3Gi
+    ENV: prod
+    INSECURE_SKIP_TLS_VERIFY: true
+    KUBE_NAMESPACE: dq-apps
+    OAG_CPU_LIMIT: 2.5
+    OAG_CPU_REQUEST: 2
+    OAG_PVC_SIZE: 5Gi
+    OAG_RAM_LIMIT: 4Gi
+    OAG_RAM_REQUEST: 3Gi
+    PROD_KUBE_SERVER:
+      from_secret: PROD_KUBE_SERVER
+    PROD_KUBE_TOKEN:
+      from_secret: PROD_KUBE_TOKEN
+    PROD_OAG_RDS_DATABASE:
+      from_secret: PROD_OAG_RDS_DATABASE
+    PROD_OAG_RDS_HOST:
+      from_secret: PROD_OAG_RDS_HOST
+    PROD_OAG_RDS_PASSWORD:
+      from_secret: PROD_OAG_RDS_PASSWORD
+    PROD_OAG_RDS_TABLE:
+      from_secret: PROD_OAG_RDS_TABLE
+    PROD_OAG_RDS_USERNAME:
+      from_secret: PROD_OAG_RDS_USERNAME
+    PROD_S3_ACCESS_KEY_ID:
+      from_secret: PROD_S3_ACCESS_KEY_ID
+    PROD_S3_BUCKET_NAME:
+      from_secret: PROD_S3_BUCKET_NAME
+    PROD_S3_SECRET_ACCESS_KEY:
+      from_secret: PROD_S3_SECRET_ACCESS_KEY
+    PROD_SLACK_WEBHOOK:
+      from_secret: PROD_SLACK_WEBHOOK
+    PROD_SSH_LANDING_DIR:
+      from_secret: PROD_SSH_LANDING_DIR
+    PROD_SSH_PRIVATE_KEY:
+      from_secret: PROD_SSH_PRIVATE_KEY
+    PROD_SSH_PRIVATE_KEY_PATH:
+      from_secret: PROD_SSH_PRIVATE_KEY_PATH
+    PROD_SSH_REMOTE_HOST_MAYTECH:
+      from_secret: PROD_SSH_REMOTE_HOST_MAYTECH
+    PROD_SSH_REMOTE_USER_MAYTECH:
+      from_secret: PROD_SSH_REMOTE_USER_MAYTECH
+  when:
+    branch:
+    - master
+    event:
+    - promote
+    target:
+    - production
+
+services:
+  - name: docker
+    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind

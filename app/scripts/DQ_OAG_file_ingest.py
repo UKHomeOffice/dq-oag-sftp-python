@@ -86,7 +86,7 @@ def run_virus_scan(scan_file):
         with open(processing, "rb") as scan:
             for i in range(1, NO_OF_RETRIES):
                 logger.info(f"scanning_file:{scan_file} - scan_count:{i}")
-                response = requests.post('http://' + BASE_URL + ':' + BASE_PORT + '/scan', files={'file': scan}, data={'name': scan_file})
+                response = requests.post('https://' + BASE_URL + ':' + BASE_PORT + '/scan', files={'file': scan}, data={'name': scan_file}, verify=False)
                 if 'Everything ok : true' in response.text:
                     break
             if not "Everything ok : true" in response.text:

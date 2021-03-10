@@ -22,6 +22,8 @@ import boto3
 import requests
 import psycopg2
 from psycopg2 import sql
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
 
 
 SSH_REMOTE_HOST_MAYTECH = os.environ["MAYTECH_HOST"]
@@ -47,6 +49,9 @@ RDS_PASSWORD            = os.environ["OAG_RDS_PASSWORD"]
 RDS_TABLE               = os.environ["OAG_RDS_TABLE"]
 SLACK_WEBHOOK           = os.environ["SLACK_WEBHOOK"]
 NO_OF_RETRIES           = int(os.getenv('NO_OF_RETRIES',4))
+
+# disable
+#urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Setup RDS connection
 
@@ -78,6 +83,7 @@ def run_virus_scan(scan_file):
     """
     Send a file to scanner API
     """
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     logger = logging.getLogger()
     logger.info("Virus Scanning %s", scan_file)
     file_list = os.listdir(STAGING_DIR)

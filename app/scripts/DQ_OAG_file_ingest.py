@@ -50,8 +50,6 @@ RDS_TABLE               = os.environ["OAG_RDS_TABLE"]
 SLACK_WEBHOOK           = os.environ["SLACK_WEBHOOK"]
 NO_OF_RETRIES           = int(os.getenv('NO_OF_RETRIES',4))
 
-# disable
-#urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Setup RDS connection
 

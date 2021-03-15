@@ -1,6 +1,6 @@
 # dq-oag-sftp-python
 
-A collection of Docker containers and RDS instance running a data pipeline.
+A Docker container running a data pipeline.
 Tasks include:
 - SFTP LIST and check against a table in RDS PostgreSQL, add if required
 - SFTP GET from a remote SFTP server
@@ -47,13 +47,11 @@ Tasks include:
 
 ## Kubernetes POD connectivity
 
-The POD consists of 3 (three) Docker containers responsible for handling data.
+The POD consists of one Docker containers responsible for handling data.
 
 | Container Name | Function | Language | Exposed port | Managed by |
 | :--- | :---: | :---: | ---: | --- |
 | dq-oag-data-ingest | Data pipeline app| Python3.7 | N/A | DQ Devops |
-| clamav-api | API for virus checks | N/A | 8080 |ACP |
-| clamav | Database for virus checks | N/A | 3310 |ACP |
 
 
 ## RDS PostgreSQL connectivity
@@ -71,8 +69,7 @@ The *dq-oag-data-ingest* container connects to the PostgreSQL backend at each ru
 
 - *dq-oag-data-ingest* lists files on an SFTP server and only move to the next step of the file does not yet exist in the RDS database table
 - *dq-oag-data-ingest* GET files from an external SFTP server
-- sending these files to *clamav-api* with destination *localhost:8080*
-- files are being sent from *clamav-api* to *clamav* with destination *localhost:3310*
+- sending these files to *clamav-api* with destination *dq-calamv:443*
 - *OK* or *!OK* response text is sent back to *dq-oag-data-ingest*
   - *IF OK* Parse files and *IF* successful DELETE from SFTP
   - *IF !OK* file is deleted from the PVC
@@ -104,10 +101,6 @@ The script will require the following variables passed in at runtime.
 
 - Components:
   - SFTP container
-  - ClamAV container
-  - ClamAV REST API container
-  - PostgreSQL container
-  - PostgreSQL sidekick container
   - OAG Python container
 
 After the script has completed - for the first time it will take around 5 minutes to download all images - there should be a couple of test files in the Primary S3 bucket and a single *xml* file in the Secondary S3 bucket:
@@ -142,3 +135,23 @@ NOTE: **all** running containers will be stopped
 ```
 sh stop.sh
 ```
+
+## Test using Mock FTP EC2
+
+ in order to test ingesting files in Notprod environemt prior to Prod Deployment. Below are the steps requried:
+
+ - deploy the modified version of *dq-oag-data-ingest* pod to NOTPROD_DATABASE_URL
+
+ - logon to the mock FTP server  via ssh as follows (the EC2 instance *mock-ftp-server-centos* in DQ notprod AWS can sometimes be stopped - so ensure it is running):
+
+ ```
+ ssh -i ~/.ssh/test_instance_nonprod.cer centos@35.177.100.82
+ ```
+
+ - Once logged on change to the *mock_ftp_user* user and change to the *oag-land* directory. once in the *oag-land*, create a test file. use one of the exiting files as an example
+
+ - Once the test file is created, monitor the logs of the *dq-oag-data-ingest* pod to check if the test file is ingested, virus scanned, parsed and then pushed to S3 successfully by running the following command:
+
+ ```     
+ kubectl --context=acp-notprod_DQ --namespace=dq-apps-notprod logs -f dq-oag-data-ingest-<####>  -c dq-oag-data-ingest
+ ```

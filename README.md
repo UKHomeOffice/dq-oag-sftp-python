@@ -148,7 +148,7 @@ sh stop.sh
  ssh -i ~/.ssh/test_instance_nonprod.cer centos@35.177.100.82
  ```
 
- - Once logged on change to the *mock_ftp_user* user and change to the *oag-land* directory. once in the *oag-land*, create a test file. use one of the exiting files as an example
+ - Once logged on change to the *mock_ftp_user* user and change to the *oag-land* directory. Once in the *oag-land* dir, create a test file. use one of the exiting files as an example.
 
  - Once the test file is created, monitor the logs of the *dq-oag-data-ingest* pod to check if the test file is ingested, virus scanned, parsed and then pushed to S3 successfully by running the following command:
 

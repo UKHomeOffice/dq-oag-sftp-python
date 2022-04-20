@@ -40,9 +40,35 @@ RUN apk add --update py-pip && \
     apk add --update py3-schedule && \
     apk add --update py3-cryptography
 
-# Copy files to PVC and set permissions
-RUN chmod +x docker-entrypoint.sh &&\
-    /docker-entrypoint.sh
+# Install PM2
+RUN apk add --update nodejs npm
+RUN npm install -g pm2 && \
+    npm update -g pm2
 
 
-ENTRYPOINT ["tail", "-f", "/docker-entrypoint.sh"]
+RUN apk update --quiet \
+    && apk upgrade --quiet
+
+VOLUME ["/ADT"]
+RUN chown -R runner:runner /ADT
+
+RUN chown runner:runner /docker-entrypoint.sh && \
+chmod +x /docker-entrypoint.sh
+
+USER ${USERMAP_UID}
+
+WORKDIR /ADT
+
+ENTRYPOINT ["sh", "/docker-entrypoint.sh"]
+
+# Start PM2
+CMD pm2-docker /ADT/scripts/ecosystem.config.js  -- --config $SSH_REMOTE_HOST_MAYTECH $SSH_REMOTE_USER_MAYTECH $SSH_PRIVATE_KEY \
+    $SSH_LANDING_DIR $S3_BUCKET_NAME $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY \
+    $CLAMAV_URL $CLAMAV_PORT $OAG_RDS_HOST $OAG_RDS_DATABASE $OAG_RDS_USERNAME $OAG_RDS_PASSWORD \
+    $OAG_RDS_TABLE $SLACK_WEBHOOK
+
+# Save PM2 configuration
+RUN pm2 save
+
+RUN node --version
+RUN npm --version

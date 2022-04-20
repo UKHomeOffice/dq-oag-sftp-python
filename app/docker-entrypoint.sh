@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Copy all files and folders from the staging area to PVC
 cp -R /tmp/ADT/data /ADT

@@ -39,7 +39,7 @@ RUN apk add --update py-pip && \
     apk add --update py3-requests && \
     apk add --update py3-schedule && \
     apk add --update py3-cryptography && \
-    apk add --update py3-psycopg2
+    apk add --update py3-psycopg2-binary
 
 # Install PM2
 RUN apk add --update nodejs npm

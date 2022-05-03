@@ -306,7 +306,7 @@ def main():
 # Parse downloaded file
 # Remove files from SFTP
                 try:
-                    if parse_xml(file_xml_staging) is not 0:
+                    if parse_xml(file_xml_staging) != 0:
                         os.rename(file_xml_staging, file_failed_parse_dir)
                         logger.error("Moved failed parsed file %s", file_xml)
                     else:

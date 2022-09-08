@@ -81,8 +81,8 @@ steps:
   commands:
     *rotate-app-user-aws-key
   environment:
-    SSM_KEY_ID: kubernetes-oag-user-id-apps-notprod-dq
-    SSM_SECURE_KEY: kubernetes-oag-user-key-apps-notprod-dq
+    SSM_KEY_ID: oag-user-id-apps-notprod-dq
+    SSM_SECURE_KEY: oag-user-key-apps-notprod-dq
     APP_USER_NAME: iam-user-oag-apps-notprod-dq
     ENV: notprod
     VAULT_ADDR:
@@ -166,8 +166,8 @@ steps:
   commands:
     *rotate-app-user-aws-key
   environment:
-    SSM_KEY_ID: kubernetes-oag-user-id-apps-prod-dq
-    SSM_SECURE_KEY: kubernetes-oag-user-key-apps-prod-dq
+    SSM_KEY_ID: oag-user-id-apps-prod-dq
+    SSM_SECURE_KEY: oag-user-key-apps-prod-dq
     APP_USER_NAME: iam-user-oag-apps-prod-dq
     ENV: prod
     VAULT_ADDR:

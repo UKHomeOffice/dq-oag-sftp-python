@@ -32,6 +32,18 @@ RUN addgroup -g $RUNNER_UID runner && \
     chown -R runner:runner /home/runner/.pm2 && \
     chown -R runner:runner /home/runner/.ssh
 
+#New packages available to address security vulnerabilities
+RUN apk update && apk add --upgrade \
+    libcrypto3 \
+    libssl3 \
+    libexpat \
+    musl \
+    musl-utils \
+    python3 \
+    python3-pyc \
+    python3-pycache-pyc0 \
+    xz-libs
+
 # Install script dependencies
 RUN apk add --update py-pip && \
     apk add --update py3-boto3 && \

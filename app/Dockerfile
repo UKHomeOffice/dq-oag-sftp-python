@@ -45,7 +45,13 @@ RUN apk add --update py-pip && \
 RUN apk add --update nodejs npm
 RUN npm install -g pm2 && \
     npm update -g pm2
-
+# ────────────────────────────────────────────────
+# FIX THE CVEs: upgrade the vulnerable Node packages
+# ────────────────────────────────────────────────
+RUN npm install -g --no-save \
+    js-yaml@4.1.1 \
+    lodash@4.17.23 \
+    systeminformation@5.27.14
 
 RUN apk update --quiet \
     && apk upgrade --quiet

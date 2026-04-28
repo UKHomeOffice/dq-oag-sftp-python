@@ -50,8 +50,8 @@ RUN npm install -g pm2 && \
 # ────────────────────────────────────────────────
 RUN npm install -g --no-save \
     js-yaml@4.1.1 \
-    lodash@4.17.23 \
-    systeminformation@5.27.14
+    lodash@4.18.0\
+    systeminformation@5.31.0
 
 RUN apk update --quiet \
     && apk upgrade --quiet

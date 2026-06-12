@@ -116,7 +116,6 @@ steps:
       - hotfix/*
       - feature/*
     event:
-      - promote
       - push
     target:
       exclude:

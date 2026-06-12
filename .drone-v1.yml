@@ -93,31 +93,7 @@ steps:
     event:
       - push
 
-- name: scale_down_pods_dev
-  pull: if-not-exists
-  image: quay.io/ukhomeofficedigital/kd
-  commands:
-  - export KUBE_SERVER=$${NOTPROD_KUBE_SERVER}
-  - export KUBE_TOKEN=$${NOTPROD_KUBE_TOKEN}
-  - export KUBE_NAMESPACE=$${NOTPROD_KUBE_NAMESPACE}
-  - kd -f kube/scale-down.yml
-  environment:
-    NOTPROD_KUBE_NAMESPACE:
-      from_secret: NOTPROD_KUBE_NAMESPACE
-    NOTPROD_KUBE_SERVER:
-      from_secret: NOTPROD_KUBE_SERVER
-    NOTPROD_KUBE_TOKEN:
-      from_secret: NOTPROD_KUBE_TOKEN
-  when:
-    branch:
-      - master
-      - hotfix/*
-      - feature/*
-    event:
-      - push
-    target:
-      exclude:
-        - production
+
 
 - name: deploy_to_dev
   pull: if-not-exists
@@ -140,7 +116,7 @@ steps:
   - export OAG_RDS_PASSWORD=$$NOTPROD_OAG_RDS_PASSWORD
   - export OAG_RDS_TABLE=$$NOTPROD_OAG_RDS_TABLE
   - export SLACK_WEBHOOK=$$NOTPROD_SLACK_WEBHOOK
-  - kd -f kube/pvc.yml -f kube/secret.yml -f kube/deployment.yml
+  - kd -f kube/scale-down.yml kube/pvc.yml -f kube/secret.yml -f kube/deployment.yml
   environment:
     ENV: notprod
     INSECURE_SKIP_TLS_VERIFY: true

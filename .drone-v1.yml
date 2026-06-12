@@ -95,7 +95,7 @@ steps:
 
 - name: scale_down_pods_dev
   pull: if-not-exists
-  image: *kd-image
+  image: quay.io/ukhomeofficedigital/kd
   commands:
   - export KUBE_SERVER=$${NOTPROD_KUBE_SERVER}
   - export KUBE_TOKEN=$${NOTPROD_KUBE_TOKEN}
@@ -212,7 +212,7 @@ steps:
 
 - name: scale_down_pods_prod
   pull: if-not-exists
-  image: *kd-image
+  image: quay.io/ukhomeofficedigital/kd
   commands:
   - export KUBE_SERVER=$${PROD_KUBE_SERVER}
   - export KUBE_TOKEN=$${PROD_KUBE_TOKEN}

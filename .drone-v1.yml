@@ -100,8 +100,7 @@ steps:
   - export KUBE_SERVER=$${NOTPROD_KUBE_SERVER}
   - export KUBE_TOKEN=$${NOTPROD_KUBE_TOKEN}
   - export KUBE_NAMESPACE=$${NOTPROD_KUBE_NAMESPACE}
-  - command -v kubectl >/dev/null 2>&1
-  - kd -f kube/scale-down.ym
+  - kd -f kube/scale-down.yml
   environment:
     NOTPROD_KUBE_NAMESPACE:
       from_secret: NOTPROD_KUBE_NAMESPACE

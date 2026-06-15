@@ -101,8 +101,8 @@ steps:
   - export KUBE_TOKEN=$${NOTPROD_KUBE_TOKEN}
   - export KUBE_NAMESPACE=$${NOTPROD_KUBE_NAMESPACE}
   - command -v kubectl >/dev/null 2>&1
-  - kubectl --server="$${KUBE_SERVER}" --token="$${KUBE_TOKEN}" --namespace="$${KUBE_NAMESPACE}" --insecure-skip-tls-verify scale deployment dq-api-msk-consumer --replicas=0
-  - kubectl --server="$${KUBE_SERVER}" --token="$${KUBE_TOKEN}" --namespace="$${KUBE_NAMESPACE}" --insecure-skip-tls-verify wait --for=delete pod -l name=dq-api-msk-consumer --timeout=120s
+  - kubectl --server="$${KUBE_SERVER}" --token="$${KUBE_TOKEN}" --namespace="$${KUBE_NAMESPACE}" --insecure-skip-tls-verify scale deployment dq-oag-data-ingest --replicas=0
+  - kubectl --server="$${KUBE_SERVER}" --token="$${KUBE_TOKEN}" --namespace="$${KUBE_NAMESPACE}" --insecure-skip-tls-verify wait --for=delete pod -l name=dq-oag-data-ingest --timeout=120s
   environment:
     NOTPROD_KUBE_NAMESPACE:
       from_secret: NOTPROD_KUBE_NAMESPACE

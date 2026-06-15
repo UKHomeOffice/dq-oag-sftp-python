@@ -93,7 +93,34 @@ steps:
     event:
       - push
 
-
+- name: scale_down_pods_dev
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/kd
+  commands:
+  - export KUBE_SERVER=$${NOTPROD_KUBE_SERVER}
+  - export KUBE_TOKEN=$${NOTPROD_KUBE_TOKEN}
+  - export KUBE_NAMESPACE=$${NOTPROD_KUBE_NAMESPACE}
+  - command -v kubectl >/dev/null 2>&1
+  - kubectl --server="$${KUBE_SERVER}" --token="$${KUBE_TOKEN}" --namespace="$${KUBE_NAMESPACE}" --insecure-skip-tls-verify scale deployment dq-api-msk-consumer --replicas=0
+  - kubectl --server="$${KUBE_SERVER}" --token="$${KUBE_TOKEN}" --namespace="$${KUBE_NAMESPACE}" --insecure-skip-tls-verify wait --for=delete pod -l name=dq-api-msk-consumer --timeout=120s
+  environment:
+    NOTPROD_KUBE_NAMESPACE:
+      from_secret: NOTPROD_KUBE_NAMESPACE
+    NOTPROD_KUBE_SERVER:
+      from_secret: NOTPROD_KUBE_SERVER
+    NOTPROD_KUBE_TOKEN:
+      from_secret: NOTPROD_KUBE_TOKEN
+  when:
+    branch:
+      - master
+      - hotfix/*
+      - feature/*
+    event:
+      - promote
+      - push
+    target:
+      exclude:
+        - production
 
 - name: deploy_to_dev
   pull: if-not-exists
@@ -116,7 +143,7 @@ steps:
   - export OAG_RDS_PASSWORD=$$NOTPROD_OAG_RDS_PASSWORD
   - export OAG_RDS_TABLE=$$NOTPROD_OAG_RDS_TABLE
   - export SLACK_WEBHOOK=$$NOTPROD_SLACK_WEBHOOK
-  - kd -f kube/pvc.yml -f kube/secret.yml -f kube/scale-down.yml -f kube/deployment.yml
+  - kd -f kube/pvc.yml -f kube/secret.yml -f kube/deployment.yml
   environment:
     ENV: notprod
     INSECURE_SKIP_TLS_VERIFY: true

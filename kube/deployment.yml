@@ -7,6 +7,8 @@ metadata:
     {{ if eq .ENV "notprod" }}downscaler/uptime: Mon-Fri 07:00-18:30 Europe/London{{ end }}
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       name: dq-oag-data-ingest

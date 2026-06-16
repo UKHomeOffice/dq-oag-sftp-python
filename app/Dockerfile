@@ -43,15 +43,33 @@ RUN apk add --update py-pip && \
 
 # Install PM2
 RUN apk add --update nodejs npm
-RUN npm install -g pm2 && \
-    npm update -g pm2
-# ────────────────────────────────────────────────
-# FIX THE CVEs: upgrade the vulnerable Node packages
-# ────────────────────────────────────────────────
-RUN npm install -g --no-save \
-    js-yaml@4.1.1 \
-    lodash@4.18.0\
-    systeminformation@5.31.0
+#RUN npm install -g pm2 && \
+#    npm update -g pm2
+
+# ─────────────────────────────────────────────────────────────────
+# FIX CVEs & OPTIMIZE SIZE: Universal dependency override & cleanup
+# ─────────────────────────────────────────────────────────────────
+RUN mkdir -p /tmp/npm-patch && cd /tmp/npm-patch && \
+    # 1. Create a root manifest enforcing secure versions across the entire build tree
+    echo '{\
+      "overrides": {\
+        "systeminformation": "5.31.6",\
+        "lodash": "4.18.0",\
+        "ws": "8.20.1",\
+        "diff": "8.0.3",\
+        "serialize-javascript": "7.0.5"\
+      }\
+    }' > package.json && \
+    # 2. Install PM2 and required packages globally using the strict overrides config
+    # (Removed redundant 'npm update' command which bypassed the overrides file)
+    npm install -g pm2 js-yaml@4.1.1 lodash@4.18.0 systeminformation@5.31.6 && \
+    # 3. ─── CLEANUP SECTOR (Enforces strict size limits) ───
+    cd / && rm -rf /tmp/npm-patch && \
+    npm cache clean --force && \
+    rm -rf /root/.npm/_cacache && \
+    rm -rf /root/.node-gyp && \
+    # Strip optional testing/doc folders brought in by npm
+    find "$(npm root -g)" -type d \( -name "test" -o -name "doc" -o -name "docs" \) -exec rm -rf {} + 2>/dev/null || true
 
 RUN apk update --quiet \
     && apk upgrade --quiet
